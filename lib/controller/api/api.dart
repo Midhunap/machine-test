@@ -18,6 +18,9 @@ class ApiProviders extends GetxController{
   var suggested = [].obs;
   var best_seller = [].obs;
   var categories = [].obs;
+  var banner1 = [].obs;
+  var banner2 = [].obs;
+  var cartCount = 0.obs;
 
   var id = ''.obs;
   var token = ''.obs;
@@ -41,11 +44,9 @@ class ApiProviders extends GetxController{
       suggested.value = items['suggested_products'];
       best_seller.value = items['best_seller'];
       categories.value = items['categories'];
-      print('Our products : ${ourProducts.value}');
-
-
-      
-
+      banner1.value = items['banner1'];
+      banner2.value = items['banner2'];
+      cartCount.value = items['cartcount'];
     }
   }
 

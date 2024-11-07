@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -23,7 +24,9 @@ class _HomePageState extends State<HomePage> {
   var cont = Get.put(ApiProviders());
   @override
   void initState() {
-    cont.onPageStart();
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      cont.onPageStart();
+    });
     super.initState();
   }
 
@@ -65,26 +68,34 @@ class _HomePageState extends State<HomePage> {
               //banner
               Stack(
                 children: [
-                  Image.network('https://swan.alisonsnewdemo.online/images/banner/1695716382_1_sH4k9mEPpOeGBInBvUUc9G2X3tXUhPE41ZH3Vp5B.webp'),
+                  Obx(() =>cont.banner1.value.isEmpty?
+                      loader():
+                  CarouselSlider.builder(
+                    itemCount: cont.banner1.length,
+                    itemBuilder: (context, index, realIndex) {
+                      String image = cont.banner1.value[index]['image'];
+                      return Image.network(
+                        '$serurl/images/banner/$image',
+                        fit: BoxFit.cover,
+                        width: MediaQuery.of(context).size.width,
+                      );
+                    },
+                    options: CarouselOptions(
+                      autoPlay: true,
+                      viewportFraction: 1.0,
+                      onPageChanged: (index, reason) {
+                      },
+                    ),
+                  )),
                   shopNow(),
-                  Positioned(
-                    left: 30,
-                      bottom: 20,
-                      child: Image.asset(
-                        'assets/icon/banner_title.png',
-                        color: Colors.white,
-                      )
-                  )
-
-
-
                 ],
               ),
               // our brands
               const SizedBox(height: 10,),
               titleText('Our Brands'),
+              const SizedBox(height: 10,),
               Padding(
-                padding: const EdgeInsets.all(15.0),
+                padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: SizedBox(
                   height: 150,
                   child:Obx(
@@ -141,16 +152,14 @@ class _HomePageState extends State<HomePage> {
               //Suggested for you
               const SizedBox(height: 10,),
               titleText('Suggested For You'),
+              const SizedBox(height: 10,),
               Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: SizedBox(height: 400,
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: SizedBox(
+                  height: 350,
                   child:Obx(()=>
                   cont.suggested.value.isEmpty?
-                      Center(
-                        child: const CircularProgressIndicator(
-                          color: Colors.grey,
-                        ),
-                      ):
+                      loader():
                       ListView.builder(
                       shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
@@ -196,19 +205,17 @@ class _HomePageState extends State<HomePage> {
                         );
                       })),),
               ),
-
+              const SizedBox(height: 10,),
+              Image.network('$serurl/images/banner/1690184122_1_Mm05vGbG777SMCXlD1n0itrvW1PheeEtLyEVWfUi.webp'),
               const SizedBox(height: 10,),
               titleText('Best seller'),
+              const SizedBox(height: 10,),
               Padding(
-                padding: const EdgeInsets.all(15.0),
+                padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: SizedBox(height: 400,
                   child:Obx(()=>
                   cont.best_seller.value.isEmpty?
-                  Center(
-                    child: const CircularProgressIndicator(
-                      color: Colors.grey,
-                    ),
-                  ):
+                  loader():
                   ListView.builder(
                       shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
@@ -254,67 +261,62 @@ class _HomePageState extends State<HomePage> {
                         );
                       })),),
               ),
-
-              const SizedBox(height: 10,),
               titleText('Trending Categories'),
-              Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: SizedBox(height: 400,
-                  child:Obx(()=>
+              const SizedBox(height: 10,),
+              Align(
+                alignment: Alignment.center,
+                child: Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Obx(()=>
                   cont.categories.value.isEmpty?
-                  Center(
-                    child: const CircularProgressIndicator(
-                      color: Colors.grey,
+                  loader():
+                  GridView.builder(
+                    shrinkWrap: true,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 8.0,
+                      crossAxisSpacing: 8.0,
                     ),
-                  ):
-                  SizedBox(
-                    height: 500,
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 8.0,
-                        crossAxisSpacing: 8.0,
-                      ),
-                      itemCount: 4,
-                      itemBuilder: (BuildContext context, int index) {
-                        var item = cont.categories.value[index];
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Row(
-
-                              children: [
-                                SizedBox(
-                                  height:150,
-                                  width: 150,
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    child: Image.network(
-                                      '$serurl/images/category/${item['category']['image']}',
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10,)
-                              ],
+                    itemCount: cont.categories.value.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      var item = cont.categories.value[index];
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            height: 140,
+                            width: 160,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10.0),
+                              child: Image.network(
+                                '$serurl/images/category/${item['category']['image']}',
+                                fit: BoxFit.fill,
+                              ),
                             ),
-                            const SizedBox(height: 2,),
-                            SizedBox(
-                              width: 100,
-                              child: Text('${item['category']['name']}',style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500
-                              ),),
-                            ),
-                           ],
-                        );
-                      },
-                    ),
+                          ),
+                          const SizedBox(height: 2,),
+                          SizedBox(
+                            width: 100,
+                            child: Text('${item['category']['name']}',style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500
+                            ),),
+                          ),
+                        ],
+                      );
+                    },
                   )
-                  ),),
+                  ),
+                ),
               ),
+              titleText('Shop Exclusive Deals'),
+              const SizedBox(height: 10,),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 15),
+                child: Image.network('$serurl/images/banner/1690193506_1_i9jhinKdMadeoJILsKLJUG6tUlDYT1mvcI5AMhAo.webp'),
+              )
+
             ],
           ),
         ),
@@ -351,7 +353,8 @@ class _HomePageState extends State<HomePage> {
             shape: BoxShape.circle,
             color: Colors.orange,
           ),
-          child: Center(child: Text('2',style: TextStyle(fontWeight: FontWeight.w400,fontSize: 10),)),
+          child: Obx(()=>Center(
+              child: Text(cont.cartCount.value.toString(),style: TextStyle(fontWeight: FontWeight.w400,fontSize: 10),))),
         ),
       ),
     ],
